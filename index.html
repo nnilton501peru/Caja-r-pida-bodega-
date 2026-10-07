@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caja Rápida - Bodega</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            background-color: #0b0f19;
+            color: #ffffff;
+            padding: 8px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 400px;
+            background: #131822;
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid #1f293d;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 8px;
+            color: #34d399;
+            font-size: 1.1rem;
+        }
+        
+        /* Pestañas de navegación superiores */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 8px 4px;
+            background: #1c2433;
+            border: 1px solid #2a364d;
+            color: #9ca3af;
+            font-size: 0.8rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+        }
+        .tab-btn.active {
+            background: #2563eb;
+            color: #ffffff;
+            border-color: #3b82f6;
+        }
+
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        .card {
+            background: #1c2433;
+            border-radius: 8px;
+            padding: 8px;
+            margin-bottom: 8px;
+            border: 1px solid #2a364d;
+        }
+        .row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 6px;
+        }
+        
+        /* Inputs y campos */
+        input[type="text"] {
+            width: 100%;
+            padding: 8px 10px;
+            font-size: 1.1rem;
+            background: #0b0f19;
+            border: 1px solid #374151;
+            border-radius: 6px;
+            color: #ffffff;
+        }
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 1.5rem;
+            background: #0b0f19;
+            border: 1px solid #374151;
+            border-radius: 6px;
+            color: #34d399;
+            text-align: right;
+            font-weight: bold;
+        }
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #34d399;
+        }
+        
+        button {
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 6px;
+            border: none;
+        }
+        .btn-plus {
+            background: #2563eb;
+            color: white;
+            padding: 0 16px;
+            font-size: 1.6rem;
+        }
+
+        /* Lista de precios ampliada */
+        .full-list {
+            margin-top: 6px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 6px;
+            border-bottom: 1px solid #2a364d;
+            font-size: 1.05rem;
+        }
+        .item-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .item-name {
+            color: #ffffff;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+        .item-num {
+            color: #9ca3af;
+            font-size: 0.8rem;
+        }
+        .item-price {
+            color: #34d399;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        .btn-del {
+            background: none;
+            color: #f87171;
+            font-size: 1.1rem;
+            padding: 4px 6px;
+        }
+
+        .quick-cash {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            margin-top: 6px;
+        }
+        .btn-cash {
+            padding: 10px 0;
+            background: #273248;
+            border: 1px solid #3b4d6e;
+            color: #fff;
+            font-size: 1rem;
+            border-radius: 6px;
+        }
+
+        .result-panel {
+            background: #0b0f19;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #2a364d;
+        }
+        .res-title {
+            font-size: 0.8rem;
+            color: #9ca3af;
+            text-transform: uppercase;
+        }
+        .res-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #34d399;
+            margin: 2px 0;
+        }
+        .res-sub {
+            font-size: 0.85rem;
+            color: #9ca3af;
+            border-top: 1px solid #1c2433;
+            padding-top: 4px;
+        }
+        
+        .btn-action {
+            width: 100%;
+            margin-top: 6px;
+            padding: 10px;
+            color: white;
+            font-size: 0.95rem;
+            border-radius: 6px;
+        }
+        .btn-cobrar-guardar { background: #059669; }
+        .btn-reset { background: #ef4444; margin-top: 6px; }
+
+        /* Botones de compartir (NUEVO) */
+        .btn-whatsapp { background: #25d366; color: #0b0f19; }
+        .btn-copiar { background: #273248; border: 1px solid #3b4d6e; }
+        .btn-foto { background: #7c3aed; }
+        
+        .subtotal-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #0b0f19;
+            padding: 8px 10px;
+            border-radius: 6px;
+            margin-top: 6px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: 1px solid #2a364d;
+        }
+
+        /* Estilos del Historial */
+        .historial-item {
+            background: #0b0f19;
+            border: 1px solid #2a364d;
+            border-radius: 6px;
+            padding: 8px;
+            margin-bottom: 6px;
+            cursor: pointer;
+        }
+        .historial-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #34d399;
+        }
+        .historial-time {
+            font-size: 0.8rem;
+            color: #9ca3af;
+        }
+        .historial-resumen-pago {
+            font-size: 0.85rem;
+            color: #fbbf24;
+            margin-top: 2px;
+        }
+        .historial-detalle {
+            display: none;
+            margin-top: 6px;
+            border-top: 1px dashed #2a364d;
+            padding-top: 6px;
+            font-size: 0.9rem;
+            color: #d1d5db;
+        }
+        .historial-item.open .historial-detalle {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Caja Rápida Bodega</h2>
+    
+    <!-- Pestañas de Navegación -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="cambiarTab('sumadora', event)">📋 Suma</button>
+        <button class="tab-btn" onclick="cambiarTab('caja', event)">💵 Cobrar</button>
+        <button class="tab-btn" onclick="cambiarTab('historial', event)">⏱️ Historial</button>
+    </div>
+
+    <!-- PESTAÑA 1: SUMADORA Y LISTA -->
+    <div id="tab-sumadora" class="tab-content active">
+        <div class="card">
+            <!-- Campo opcional de Nombre (Arriba y discreto) -->
+            <input type="text" id="txtNombre" placeholder="Nombre (Opcional: Arroz, Fideos...)" style="margin-bottom: 6px;">
+            
+            <div class="row">
+                <input type="number" id="txtPrecio" placeholder="Precio 0.00" step="any">
+                <button class="btn-plus" id="btnAgregar">+</button>
+            </div>
+            
+            <div class="subtotal-box">
+                <span>Subtotal:</span>
+                <span id="lblSubtotal" style="color: #34d399;">S/ 0.00</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="full-list" id="divLista">
+                <div style="color: #6b7280; text-align: center; padding: 10px;">Sin productos</div>
+            </div>
+        </div>
+        <button class="btn-action btn-cobrar-guardar" onclick="irACobrar()">Ir a Cobrar / Guardar</button>
+    </div>
+
+    <!-- PESTAÑA 2: CAJA Y VUELTO -->
+    <div id="tab-caja" class="tab-content">
+        <div class="card">
+            <span style="font-size: 0.8rem; color: #9ca3af; display:block; margin-bottom:4px;">Total a Pagar (S/)</span>
+            <input type="number" id="txtTotal" placeholder="0.00" step="any" style="margin-bottom: 8px;">
+
+            <span style="font-size: 0.8rem; color: #9ca3af; display:block; margin-bottom:4px;">Pago del cliente (S/)</span>
+            <input type="number" id="txtPago" placeholder="0.00" step="any" style="margin-bottom: 6px;">
+
+            <div class="quick-cash">
+                <button class="btn-cash" onclick="ponerPago(10)">10</button>
+                <button class="btn-cash" onclick="ponerPago(20)">20</button>
+                <button class="btn-cash" onclick="ponerPago(50)">50</button>
+                <button class="btn-cash" onclick="ponerPago(100)">100</button>
+            </div>
+        </div>
+
+        <div class="result-panel">
+            <div class="res-title">Su Vuelto Exacto:</div>
+            <div class="res-value" id="lblVuelto">S/ 0.00</div>
+            <div id="lblDetalle" class="res-sub">Ingrese los montos</div>
+        </div>
+
+        <button class="btn-action btn-cobrar-guardar" onclick="registrarVentaYLimpiar()" style="margin-top: 8px;">💾 Registrar Venta (Finalizar)</button>
+    </div>
+
+    <!-- PESTAÑA 3: HISTORIAL -->
+    <div id="tab-historial" class="tab-content">
+        <div class="card">
+            <span style="font-size: 0.85rem; color: #9ca3af; display:block; margin-bottom:6px; font-weight:bold;">Últimas Ventas (Toca para ver detalle):</span>
+            <div id="divHistorial" style="max-height: 250px; overflow-y: auto;">
+                <div style="color: #6b7280; text-align: center; padding: 15px;">No hay ventas registradas aún</div>
+            </div>
+        </div>
+    </div>
+
+    <button class="btn-action btn-reset" id="btnLimpiar">Limpiar Todo</button>
+</div>
+
+<script>
+    let listaPrecios = JSON.parse(localStorage.getItem('cajaRapida_listaPrecios') || '[]');
+    let historialVentas = JSON.parse(localStorage.getItem('cajaRapida_historialVentas') || '[]');
+
+    const txtNombre = document.getElementById('txtNombre');
+    const txtPrecio = document.getElementById('txtPrecio');
+    const btnAgregar = document.getElementById('btnAgregar');
+    const divLista = document.getElementById('divLista');
+    const lblSubtotal = document.getElementById('lblSubtotal');
+    const txtTotal = document.getElementById('txtTotal');
+    const txtPago = document.getElementById('txtPago');
+    const lblVuelto = document.getElementById('lblVuelto');
+    const lblDetalle = document.getElementById('lblDetalle');
+    const btnLimpiar = document.getElementById('btnLimpiar');
+    const divHistorial = document.getElementById('divHistorial');
+
+    function cambiarTab(tabName, event) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        
+        document.getElementById('tab-' + tabName).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+
+    function irACobrar() {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        
+        document.getElementById('tab-caja').classList.add('active');
+        document.querySelectorAll('.tab-btn')[1].classList.add('active');
+    }
+
+    btnAgregar.addEventListener('click', function() {
+        let val = parseFloat(txtPrecio.value);
+        if (isNaN(val) || val <= 0) return;
+
+        let nombreVal = txtNombre.value.trim();
+        if (nombreVal === "") {
+            nombreVal = `Producto #${listaPrecios.length + 1}`;
+        }
+
+        listaPrecios.push({ nombre: nombreVal, precio: val });
+        guardarEstado();
+        
+        txtNombre.value = '';
+        txtPrecio.value = '';
+        txtPrecio.focus();
+        actualizarPantalla();
+    });
+
+    txtPrecio.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            btnAgregar.click();
+        }
+    });
+
+    txtNombre.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            txtPrecio.focus();
+        }
+    });
+
+    txtTotal.addEventListener('input', calcularVuelto);
+    txtPago.addEventListener('input', calcularVuelto);
+
+    function guardarEstado() {
+        localStorage.setItem('cajaRapida_listaPrecios', JSON.stringify(listaPrecios));
+        localStorage.setItem('cajaRapida_historialVentas', JSON.stringify(historialVentas));
+    }
+
+    function actualizarPantalla() {
+        let suma = 0;
+        if (listaPrecios.length === 0) {
+            divLista.innerHTML = '<div style="color: #6b7280; text-align: center; padding: 10px;">Sin productos</div>';
+            lblSubtotal.innerText = "S/ 0.00";
+            txtTotal.value = '';
+            calcularVuelto();
+            return;
+        }
+
+        let html = '';
+        listaPrecios.forEach((item, index) => {
+            suma += item.precio;
+            html += `<div class="item-row">
+                        <div class="item-info">
+                            <span class="item-name">${item.nombre}</span>
+                            <span class="item-num">#${index + 1}</span>
+                        </div>
+                        <span class="item-price">S/ ${item.precio.toFixed(2)}</span>
+                        <button class="btn-del" onclick="borrarItem(${index})">✕</button>
+                     </div>`;
+        });
+
+        divLista.innerHTML = html;
+        lblSubtotal.innerText = "S/ " + suma.toFixed(2);
+        txtTotal.value = suma.toFixed(2);
+        calcularVuelto();
+    }
+
+    window.borrarItem = function(index) {
+        listaPrecios.splice(index, 1);
+        guardarEstado();
+        actualizarPantalla();
+    }
+
+    window.ponerPago = function(monto) {
+        txtPago.value = monto.toFixed(2);
+        calcularVuelto();
+    }
+
+    function calcularVuelto() {
+        let total = parseFloat(txtTotal.value);
+        let pago = parseFloat(txtPago.value);
+
+        if (isNaN(total) || isNaN(pago)) {
+            lblVuelto.innerText = "S/ 0.00";
+            lblVuelto.style.color = "#34d399";
+            lblDetalle.innerText = "Ingrese los datos";
+            return { vueltoVal: 0, pagoVal: 0 };
+        }
+
+        let vuelto = pago - total;
+
+        if (vuelto < 0) {
+            lblVuelto.innerText = "Falta dinero";
+            lblVuelto.style.color = "#f87171";
+            lblDetalle.innerText = "El pago es menor al total";
+            return { vueltoVal: 0, pagoVal: pago };
+        } else {
+            lblVuelto.style.color = "#34d399";
+            lblVuelto.innerText = "S/ " + vuelto.toFixed(2);
+            let soles = Math.floor(vuelto);
+            let centimos = Math.round((vuelto % 1) * 100);
+            lblDetalle.innerText = `${soles} soles y ${centimos} céntimos`;
+            return { vueltoVal: vuelto, pagoVal: pago };
+        }
+    }
+
+    window.registrarVentaYLimpiar = function() {
+        if (listaPrecios.length === 0) return;
+
+        let totalVenta = listaPrecios.reduce((a, b) => a + b.precio, 0);
+        let datosCalculo = calcularVuelto();
+        let pagoCliente = datosCalculo.pagoVal;
+        let vueltoEntregado = pagoCliente >= totalVenta ? (pagoCliente - totalVenta) : 0;
+
+        let ahora = new Date();
+        let horaStr = ahora.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        let nuevaVenta = {
+            hora: horaStr,
+            total: totalVenta,
+            pago: pagoCliente,
+            vuelto: vueltoEntregado,
+            items: [...listaPrecios]
+        };
+
+        historialVentas.unshift(nuevaVenta);
+        if (historialVentas.length > 5) {
+            historialVentas.pop();
+        }
+
+        actualizarHistorialUI();
+        limpiarTodoGeneral();
+        guardarEstado();
+        cambiarTab('sumadora', { currentTarget: document.querySelectorAll('.tab-btn')[0] });
+    }
+
+    function actualizarHistorialUI() {
+        if (historialVentas.length === 0) {
+            divHistorial.innerHTML = '<div style="color: #6b7280; text-align: center; padding: 15px;">No hay ventas registradas aún</div>';
+            return;
+        }
+
+        let html = '';
+        historialVentas.forEach((venta, i) => {
+            let itemsHtml = venta.items.map((it, idx) => `<div style="display:flex; justify-content:space-between; margin-bottom:2px;"><span>#${idx + 1} ${it.nombre}</span><span>S/ ${it.precio.toFixed(2)}</span></div>`).join('');
+            html += `<div class="historial-item" onclick="this.classList.toggle('open')">
+                        <div class="historial-header">
+                            <span>Total: S/ ${venta.total.toFixed(2)}</span>
+                            <span class="historial-time">🕒 ${venta.hora}</span>
+                        </div>
+                        <div class="historial-resumen-pago">
+                            Pagó: S/ ${venta.pago.toFixed(2)} | Vuelto: S/ ${venta.vuelto.toFixed(2)}
+                        </div>
+                        <div style="font-size: 0.75rem; color: #60a5fa; margin-top: 2px;">Toca para ver detalle de productos ▼</div>
+                        <div class="historial-detalle">
+                            <div style="margin-bottom: 4px; font-weight: bold; color: #34d399;">Productos:</div>
+                            ${itemsHtml}
+                        </div>
+                        <div class="row" style="margin-top: 8px; margin-bottom: 0;" onclick="event.stopPropagation()">
+                            <button class="btn-action btn-whatsapp" style="flex:1; width:auto; margin-top:0;" onclick="compartirVenta(${i})">📲 WhatsApp</button>
+                            <button class="btn-action btn-copiar" style="flex:1; width:auto; margin-top:0;" onclick="copiarVenta(${i})">📋 Copiar</button>
+                        </div>
+                        <div style="margin-top: 6px;" onclick="event.stopPropagation()">
+                            <button class="btn-action btn-foto" style="margin-top:0;" onclick="fotoVenta(${i})">🖼️ Foto del recibo</button>
+                        </div>
+                     </div>`;
+        });
+        divHistorial.innerHTML = html;
+    }
+
+    /* ===== NUEVO: COMPARTIR UNA VENTA ===== */
+    function armarTextoVenta(venta) {
+        let texto = '🧾 *Recibo de venta*\n';
+        texto += '\n🕒 *' + venta.hora + '* - Total: *S/ ' + venta.total.toFixed(2) + '*\n';
+        venta.items.forEach(it => {
+            texto += '• ' + it.nombre + ': S/ ' + it.precio.toFixed(2) + '\n';
+        });
+        texto += 'Pagó S/ ' + venta.pago.toFixed(2) + ' | Vuelto S/ ' + venta.vuelto.toFixed(2) + '\n';
+        return texto;
+    }
+
+    window.compartirVenta = function(i) {
+        let venta = historialVentas[i];
+        if (!venta) {
+            alert('No se encontró la venta');
+            return;
+        }
+        let url = 'https://wa.me/?text=' + encodeURIComponent(armarTextoVenta(venta));
+        window.open(url, '_blank');
+    }
+
+    window.copiarVenta = function(i) {
+        let venta = historialVentas[i];
+        if (!venta) {
+            alert('No se encontró la venta');
+            return;
+        }
+        let texto = armarTextoVenta(venta);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(texto).then(function() {
+                alert('Texto copiado, ya puedes pegarlo');
+            }).catch(function() {
+                copiarRespaldo(texto);
+            });
+        } else {
+            copiarRespaldo(texto);
+        }
+    }
+
+    /* ===== NUEVO: FOTO DEL RECIBO ===== */
+    function rectRedondo(g, x, y, w, h, r) {
+        g.beginPath();
+        g.moveTo(x + r, y);
+        g.lineTo(x + w - r, y);
+        g.quadraticCurveTo(x + w, y, x + w, y + r);
+        g.lineTo(x + w, y + h - r);
+        g.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        g.lineTo(x + r, y + h);
+        g.quadraticCurveTo(x, y + h, x, y + h - r);
+        g.lineTo(x, y + r);
+        g.quadraticCurveTo(x, y, x + r, y);
+        g.closePath();
+    }
+
+    function dibujarRecibo(venta) {
+        const W = 600;
+        const filaH = 44;
+        const H = 506 + venta.items.length * filaH;
+        const c = document.createElement('canvas');
+        c.width = W;
+        c.height = H;
+        const g = c.getContext('2d');
+        const fuente = 'Arial, Helvetica, sans-serif';
+
+        g.fillStyle = '#0b0f19';
+        g.fillRect(0, 0, W, H);
+        g.fillStyle = '#131822';
+        g.strokeStyle = '#2a364d';
+        g.lineWidth = 2;
+        rectRedondo(g, 16, 16, W - 32, H - 32, 18);
+        g.fill();
+        g.stroke();
+
+        g.textBaseline = 'alphabetic';
+        g.textAlign = 'center';
+        g.fillStyle = '#34d399';
+        g.font = 'bold 38px ' + fuente;
+        g.fillText('Caja Rápida Bodega', W / 2, 82);
+        g.fillStyle = '#9ca3af';
+        g.font = '24px ' + fuente;
+        g.fillText('Recibo de venta', W / 2, 124);
+        g.fillText('Hora: ' + venta.hora, W / 2, 158);
+
+        g.setLineDash([8, 6]);
+        g.strokeStyle = '#2a364d';
+        g.lineWidth = 2;
+        g.beginPath(); g.moveTo(48, 184); g.lineTo(W - 48, 184); g.stroke();
+
+        g.textAlign = 'left';
+        g.fillStyle = '#34d399';
+        g.font = 'bold 28px ' + fuente;
+        g.fillText('Productos:', 48, 228);
+
+        let y = 274;
+        venta.items.forEach((it, idx) => {
+            g.textAlign = 'left';
+            g.fillStyle = '#e5e7eb';
+            g.font = '28px ' + fuente;
+            let nombre = '#' + (idx + 1) + ' ' + it.nombre;
+            while (nombre.length > 1 && g.measureText(nombre).width > 330) {
+                nombre = nombre.slice(0, -1);
+            }
+            if (nombre !== '#' + (idx + 1) + ' ' + it.nombre) nombre += '…';
+            g.fillText(nombre, 48, y);
+            g.textAlign = 'right';
+            g.fillStyle = '#34d399';
+            g.font = 'bold 28px ' + fuente;
+            g.fillText('S/ ' + it.precio.toFixed(2), W - 48, y);
+            y += filaH;
+        });
+
+        let yFin = y - 14;
+        g.beginPath(); g.moveTo(48, yFin); g.lineTo(W - 48, yFin); g.stroke();
+        g.setLineDash([]);
+
+        g.textAlign = 'left';
+        g.fillStyle = '#34d399';
+        g.font = 'bold 42px ' + fuente;
+        g.fillText('Total:', 48, yFin + 62);
+        g.textAlign = 'right';
+        g.fillText('S/ ' + venta.total.toFixed(2), W - 48, yFin + 62);
+
+        g.fillStyle = '#fbbf24';
+        g.font = '30px ' + fuente;
+        g.textAlign = 'left';
+        g.fillText('Pagó:', 48, yFin + 114);
+        g.textAlign = 'right';
+        g.fillText('S/ ' + venta.pago.toFixed(2), W - 48, yFin + 114);
+
+        g.font = 'bold 34px ' + fuente;
+        g.textAlign = 'left';
+        g.fillText('Vuelto:', 48, yFin + 164);
+        g.textAlign = 'right';
+        g.fillText('S/ ' + venta.vuelto.toFixed(2), W - 48, yFin + 164);
+
+        g.textAlign = 'center';
+        g.fillStyle = '#9ca3af';
+        g.font = '22px ' + fuente;
+        g.fillText('¡Gracias por su compra!', W / 2, yFin + 222);
+
+        return c;
+    }
+
+    function mostrarFotoRecibo(canvas) {
+        let capa = document.createElement('div');
+        capa.style.cssText = 'position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.92); z-index:9999; overflow-y:auto; padding:12px; text-align:center;';
+        let aviso = document.createElement('div');
+        aviso.style.cssText = 'color:#fbbf24; font-size:0.95rem; margin-bottom:8px;';
+        aviso.innerText = 'Mantén presionada la foto para guardarla, o tómale captura y mándala por WhatsApp';
+        let img = document.createElement('img');
+        img.src = canvas.toDataURL('image/png');
+        img.style.cssText = 'width:100%; max-width:380px; border-radius:8px;';
+        let cerrar = document.createElement('button');
+        cerrar.innerText = 'Cerrar';
+        cerrar.style.cssText = 'display:block; width:100%; max-width:380px; margin:10px auto 0; padding:12px; background:#ef4444; color:#fff; font-size:1rem;';
+        cerrar.onclick = function() { document.body.removeChild(capa); };
+        capa.appendChild(aviso);
+        capa.appendChild(img);
+        capa.appendChild(cerrar);
+        document.body.appendChild(capa);
+    }
+
+    window.fotoVenta = function(i) {
+        let venta = historialVentas[i];
+        if (!venta) {
+            alert('No se encontró la venta');
+            return;
+        }
+        let canvas = dibujarRecibo(venta);
+        canvas.toBlob(async function(blob) {
+            if (blob) {
+                try {
+                    let archivo = new File([blob], 'recibo.png', { type: 'image/png' });
+                    if (navigator.canShare && navigator.canShare({ files: [archivo] })) {
+                        await navigator.share({ files: [archivo], title: 'Recibo de venta' });
+                        return;
+                    }
+                } catch (e) {
+                    if (e && e.name === 'AbortError') return;
+                }
+            }
+            mostrarFotoRecibo(canvas);
+        }, 'image/png');
+    }
+    /* ===== FIN FOTO ===== */
+
+    function copiarRespaldo(texto) {
+        let ta = document.createElement('textarea');
+        ta.value = texto;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        try {
+            document.execCommand('copy');
+            alert('Texto copiado, ya puedes pegarlo');
+        } catch (e) {
+            alert('No se pudo copiar');
+        }
+        document.body.removeChild(ta);
+    }
+    /* ===== FIN COMPARTIR ===== */
+
+    function limpiarTodoGeneral() {
+        listaPrecios = [];
+        txtNombre.value = '';
+        txtPrecio.value = '';
+        txtTotal.value = '';
+        txtPago.value = '';
+        lblSubtotal.innerText = "S/ 0.00";
+        lblVuelto.innerText = "S/ 0.00";
+        lblVuelto.style.color = "#34d399";
+        lblDetalle.innerText = "Ingrese los datos";
+        divLista.innerHTML = '<div style="color: #6b7280; text-align: center; padding: 10px;">Sin productos</div>';
+        txtPrecio.focus();
+    }
+
+    // Pintar lo que ya estaba guardado al abrir la página
+    actualizarPantalla();
+    actualizarHistorialUI();
+
+    btnLimpiar.addEventListener('click', function() {
+        limpiarTodoGeneral();
+        guardarEstado();
+    });
+</script>
+
+</body>
+</html>
