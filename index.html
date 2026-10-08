@@ -124,8 +124,6 @@
         /* Lista de precios ampliada */
         .full-list {
             margin-top: 6px;
-            max-height: 250px;
-            overflow-y: auto;
         }
         .item-row {
             display: flex;
@@ -138,6 +136,9 @@
         .item-info {
             display: flex;
             flex-direction: column;
+            flex: 1;
+            min-width: 0;
+            overflow-wrap: anywhere;
         }
         .item-name {
             color: #ffffff;
@@ -152,12 +153,18 @@
             color: #34d399;
             font-weight: bold;
             font-size: 1.2rem;
+            min-width: 105px;
+            text-align: right;
+            white-space: nowrap;
+            font-variant-numeric: tabular-nums;
         }
         .btn-del {
             background: none;
             color: #f87171;
             font-size: 1.1rem;
             padding: 4px 6px;
+            width: 40px;
+            flex-shrink: 0;
         }
 
         .quick-cash {
@@ -215,6 +222,16 @@
         .btn-whatsapp { background: #25d366; color: #0b0f19; }
         .btn-copiar { background: #273248; border: 1px solid #3b4d6e; }
         .btn-foto { background: #7c3aed; }
+        .total-turno-card { background: #1c2433; border: 1px solid #34d399; border-radius: 8px; padding: 10px; margin-bottom: 8px; }
+        .total-turno-label { font-size: 0.8rem; color: #9ca3af; font-weight: bold; }
+        .total-turno-fila { display: flex; justify-content: space-between; align-items: baseline; margin-top: 2px; }
+        .total-turno-monto { font-size: 2rem; font-weight: bold; color: #34d399; }
+        .total-turno-cant { font-size: 0.95rem; font-weight: bold; color: #fbbf24; }
+        .btn-reiniciar-turno { width: 100%; margin-top: 8px; padding: 8px; background: #273248; border: 1px solid #3b4d6e; color: #f87171; font-size: 0.85rem; }
+        .lbl-mini { font-size: 0.7rem; color: #9ca3af; margin-bottom: 2px; }
+        #txtCant { color: #fbbf24; text-align: center; border-color: #fbbf24; }
+        #txtCant:focus { border-color: #fbbf24; }
+        .btn-pantalla { display: block; width: 100%; margin-bottom: 8px; padding: 6px; background: #1c2433; border: 1px solid #2a364d; color: #9ca3af; font-size: 0.8rem; }
         
         .subtotal-box {
             display: flex;
@@ -271,6 +288,7 @@
 
 <div class="container">
     <h2>Caja Rápida Bodega</h2>
+    <button class="btn-pantalla" id="btnPantalla">⛶ Pantalla completa</button>
     
     <!-- Pestañas de Navegación -->
     <div class="tabs">
@@ -285,9 +303,16 @@
             <!-- Campo opcional de Nombre (Arriba y discreto) -->
             <input type="text" id="txtNombre" placeholder="Nombre (Opcional: Arroz, Fideos...)" style="margin-bottom: 6px;">
             
-            <div class="row">
-                <input type="number" id="txtPrecio" placeholder="Precio 0.00" step="any">
-                <button class="btn-plus" id="btnAgregar">+</button>
+            <div class="row" style="align-items: flex-end;">
+                <div style="flex:1; min-width:0;">
+                    <div class="lbl-mini">Precio</div>
+                    <input type="number" id="txtPrecio" placeholder="Precio 0.00" step="any">
+                </div>
+                <div style="width:82px; flex-shrink:0;">
+                    <div class="lbl-mini">Cantidad</div>
+                    <input type="number" id="txtCant" value="1" min="1" step="1" inputmode="numeric">
+                </div>
+                <button class="btn-plus" id="btnAgregar" style="padding: 11px 16px; line-height: 1.15;">+</button>
             </div>
             
             <div class="subtotal-box">
@@ -332,9 +357,17 @@
 
     <!-- PESTAÑA 3: HISTORIAL -->
     <div id="tab-historial" class="tab-content">
+        <div class="total-turno-card">
+            <div class="total-turno-label">Total del turno</div>
+            <div class="total-turno-fila">
+                <span class="total-turno-monto" id="lblTotalTurno">S/ 0.00</span>
+                <span class="total-turno-cant" id="lblCantVentasTurno">0 ventas</span>
+            </div>
+            <button class="btn-reiniciar-turno" id="btnReiniciarTurno">Reiniciar total del turno</button>
+        </div>
         <div class="card">
             <span style="font-size: 0.85rem; color: #9ca3af; display:block; margin-bottom:6px; font-weight:bold;">Últimas Ventas (Toca para ver detalle):</span>
-            <div id="divHistorial" style="max-height: 250px; overflow-y: auto;">
+            <div id="divHistorial">
                 <div style="color: #6b7280; text-align: center; padding: 15px;">No hay ventas registradas aún</div>
             </div>
         </div>
@@ -344,12 +377,27 @@
 </div>
 
 <script>
-    let listaPrecios = JSON.parse(localStorage.getItem('cajaRapida_listaPrecios') || '[]');
-    let historialVentas = JSON.parse(localStorage.getItem('cajaRapida_historialVentas') || '[]');
+    function cargarGuardado(clave) {
+        try {
+            let dato = JSON.parse(localStorage.getItem(clave) || '[]');
+            return Array.isArray(dato) ? dato : [];
+        } catch (e) {
+            return [];
+        }
+    }
+    let listaPrecios = cargarGuardado('cajaRapida_listaPrecios');
+    let historialVentas = cargarGuardado('cajaRapida_historialVentas');
+    let totalTurno = 0;
+    let cantVentasTurno = 0;
+    try {
+        totalTurno = parseFloat(localStorage.getItem('cajaRapida_totalTurno')) || 0;
+        cantVentasTurno = parseInt(localStorage.getItem('cajaRapida_cantVentasTurno')) || 0;
+    } catch (e) {}
 
     const txtNombre = document.getElementById('txtNombre');
     const txtPrecio = document.getElementById('txtPrecio');
     const btnAgregar = document.getElementById('btnAgregar');
+    const txtCant = document.getElementById('txtCant');
     const divLista = document.getElementById('divLista');
     const lblSubtotal = document.getElementById('lblSubtotal');
     const txtTotal = document.getElementById('txtTotal');
@@ -358,6 +406,9 @@
     const lblDetalle = document.getElementById('lblDetalle');
     const btnLimpiar = document.getElementById('btnLimpiar');
     const divHistorial = document.getElementById('divHistorial');
+    const lblTotalTurno = document.getElementById('lblTotalTurno');
+    const lblCantVentasTurno = document.getElementById('lblCantVentasTurno');
+    const btnReiniciarTurno = document.getElementById('btnReiniciarTurno');
 
     function cambiarTab(tabName, event) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -384,16 +435,30 @@
             nombreVal = `Producto #${listaPrecios.length + 1}`;
         }
 
-        listaPrecios.push({ nombre: nombreVal, precio: val });
+        let cant = parseInt(txtCant.value);
+        if (isNaN(cant) || cant < 1) cant = 1;
+
+        let item = { nombre: nombreVal, precio: val };
+        if (cant > 1) {
+            item = { nombre: nombreVal + ' x' + cant, precio: Math.round(val * cant * 100) / 100, cant: cant, unit: val };
+        }
+        listaPrecios.push(item);
         guardarEstado();
         
         txtNombre.value = '';
         txtPrecio.value = '';
+        txtCant.value = '1';
         txtPrecio.focus();
         actualizarPantalla();
     });
 
     txtPrecio.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            btnAgregar.click();
+        }
+    });
+
+    txtCant.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
             btnAgregar.click();
         }
@@ -409,8 +474,17 @@
     txtPago.addEventListener('input', calcularVuelto);
 
     function guardarEstado() {
-        localStorage.setItem('cajaRapida_listaPrecios', JSON.stringify(listaPrecios));
-        localStorage.setItem('cajaRapida_historialVentas', JSON.stringify(historialVentas));
+        try {
+            localStorage.setItem('cajaRapida_listaPrecios', JSON.stringify(listaPrecios));
+            localStorage.setItem('cajaRapida_historialVentas', JSON.stringify(historialVentas));
+            localStorage.setItem('cajaRapida_totalTurno', String(totalTurno));
+            localStorage.setItem('cajaRapida_cantVentasTurno', String(cantVentasTurno));
+        } catch (e) {}
+    }
+
+    function actualizarTurnoUI() {
+        lblTotalTurno.innerText = 'S/ ' + totalTurno.toFixed(2);
+        lblCantVentasTurno.innerText = cantVentasTurno + (cantVentasTurno === 1 ? ' venta' : ' ventas');
     }
 
     function actualizarPantalla() {
@@ -429,7 +503,7 @@
             html += `<div class="item-row">
                         <div class="item-info">
                             <span class="item-name">${item.nombre}</span>
-                            <span class="item-num">#${index + 1}</span>
+                            <span class="item-num">#${index + 1}${(item.cant > 1 && typeof item.unit === 'number') ? ' · ' + item.cant + ' × S/ ' + item.unit.toFixed(2) : ''}</span>
                         </div>
                         <span class="item-price">S/ ${item.precio.toFixed(2)}</span>
                         <button class="btn-del" onclick="borrarItem(${index})">✕</button>
@@ -491,9 +565,11 @@
 
         let ahora = new Date();
         let horaStr = ahora.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        let fechaStr = ahora.toLocaleDateString([], { day: '2-digit', month: 'short' });
 
         let nuevaVenta = {
             hora: horaStr,
+            fecha: fechaStr,
             total: totalVenta,
             pago: pagoCliente,
             vuelto: vueltoEntregado,
@@ -501,9 +577,13 @@
         };
 
         historialVentas.unshift(nuevaVenta);
-        if (historialVentas.length > 5) {
+        if (historialVentas.length > 10) {
             historialVentas.pop();
         }
+
+        totalTurno += totalVenta;
+        cantVentasTurno += 1;
+        actualizarTurnoUI();
 
         actualizarHistorialUI();
         limpiarTodoGeneral();
@@ -523,7 +603,7 @@
             html += `<div class="historial-item" onclick="this.classList.toggle('open')">
                         <div class="historial-header">
                             <span>Total: S/ ${venta.total.toFixed(2)}</span>
-                            <span class="historial-time">🕒 ${venta.hora}</span>
+                            <span class="historial-time">🕒 ${venta.fecha ? venta.fecha + ', ' : ''}${venta.hora}</span>
                         </div>
                         <div class="historial-resumen-pago">
                             Pagó: S/ ${venta.pago.toFixed(2)} | Vuelto: S/ ${venta.vuelto.toFixed(2)}
@@ -548,7 +628,7 @@
     /* ===== NUEVO: COMPARTIR UNA VENTA ===== */
     function armarTextoVenta(venta) {
         let texto = '🧾 *Recibo de venta*\n';
-        texto += '\n🕒 *' + venta.hora + '* - Total: *S/ ' + venta.total.toFixed(2) + '*\n';
+        texto += '\n🕒 *' + (venta.fecha ? venta.fecha + ', ' : '') + venta.hora + '* - Total: *S/ ' + venta.total.toFixed(2) + '*\n';
         venta.items.forEach(it => {
             texto += '• ' + it.nombre + ': S/ ' + it.precio.toFixed(2) + '\n';
         });
@@ -626,7 +706,7 @@
         g.fillStyle = '#9ca3af';
         g.font = '24px ' + fuente;
         g.fillText('Recibo de venta', W / 2, 124);
-        g.fillText('Hora: ' + venta.hora, W / 2, 158);
+        g.fillText((venta.fecha ? venta.fecha + ' - ' : '') + 'Hora: ' + venta.hora, W / 2, 158);
 
         g.setLineDash([8, 6]);
         g.strokeStyle = '#2a364d';
@@ -753,6 +833,7 @@
         listaPrecios = [];
         txtNombre.value = '';
         txtPrecio.value = '';
+        txtCant.value = '1';
         txtTotal.value = '';
         txtPago.value = '';
         lblSubtotal.innerText = "S/ 0.00";
@@ -763,11 +844,53 @@
         txtPrecio.focus();
     }
 
+    /* ===== NUEVO: PANTALLA COMPLETA ===== */
+    const btnPantalla = document.getElementById('btnPantalla');
+    const elPagina = document.documentElement;
+    const pedirFS = elPagina.requestFullscreen || elPagina.webkitRequestFullscreen;
+    const salirFS = document.exitFullscreen || document.webkitExitFullscreen;
+    if (!pedirFS || !salirFS) {
+        btnPantalla.style.display = 'none';
+    }
+    function textoPantalla() {
+        let activo = document.fullscreenElement || document.webkitFullscreenElement;
+        btnPantalla.innerText = activo ? '✕ Salir de pantalla completa' : '⛶ Pantalla completa';
+    }
+    btnPantalla.addEventListener('click', function() {
+        try {
+            let activo = document.fullscreenElement || document.webkitFullscreenElement;
+            let r = activo ? salirFS.call(document) : pedirFS.call(elPagina);
+            if (r && r.catch) r.catch(function() {});
+        } catch (e) {}
+    });
+    document.addEventListener('fullscreenchange', textoPantalla);
+    document.addEventListener('webkitfullscreenchange', textoPantalla);
+    /* ===== FIN PANTALLA COMPLETA ===== */
+
     // Pintar lo que ya estaba guardado al abrir la página
     actualizarPantalla();
     actualizarHistorialUI();
+    actualizarTurnoUI();
+
+    btnReiniciarTurno.addEventListener('click', function() {
+        if (cantVentasTurno === 0 && totalTurno === 0) return;
+        if (!confirm('¿Reiniciar el total del turno? Esto no borra el historial de ventas, solo el acumulado.')) return;
+        totalTurno = 0;
+        cantVentasTurno = 0;
+        actualizarTurnoUI();
+        guardarEstado();
+    });
 
     btnLimpiar.addEventListener('click', function() {
+        let enHistorial = document.getElementById('tab-historial').classList.contains('active');
+        if (enHistorial) {
+            if (historialVentas.length === 0) return;
+            if (!confirm('¿Seguro que quieres borrar todo el historial de ventas? Esto no se puede deshacer.')) return;
+            historialVentas = [];
+            actualizarHistorialUI();
+            guardarEstado();
+            return;
+        }
         limpiarTodoGeneral();
         guardarEstado();
     });
