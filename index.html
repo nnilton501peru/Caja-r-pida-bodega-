@@ -217,7 +217,12 @@
             border-radius: 6px;
         }
         .btn-cobrar-guardar { background: #059669; }
-        .btn-reset { background: #ef4444; margin-top: 6px; }
+        .btn-reset { background: #ef4444; margin-top: 6px; display: none; }
+        body.en-historial .btn-reset { display: block; }
+        .fila-acciones { display: flex; gap: 14px; align-items: stretch; margin-top: 6px; }
+        .fila-acciones .btn-action { margin-top: 0; width: auto; }
+        .fila-acciones .btn-principal { flex: 7; }
+        .btn-limpiar-mini { flex: 3; background: transparent; border: 1.5px solid #f87171; color: #fca5a5; }
 
         /* Botones de compartir (NUEVO) */
         .btn-whatsapp { background: #25d366; color: #0b0f19; }
@@ -331,7 +336,10 @@
                 <div style="color: #6b7280; text-align: center; padding: 10px;">Sin productos</div>
             </div>
         </div>
-        <button class="btn-action btn-cobrar-guardar" onclick="irACobrar()">Ir a Cobrar / Guardar</button>
+        <div class="fila-acciones">
+            <button class="btn-action btn-cobrar-guardar btn-principal" onclick="irACobrar()">Ir a Cobrar / Guardar</button>
+            <button class="btn-action btn-limpiar-mini" onclick="pedirLimpiarTodo()">🗑️ Limpiar</button>
+        </div>
     </div>
 
     <!-- PESTAÑA 2: CAJA Y VUELTO -->
@@ -364,7 +372,10 @@
             <div id="lblDetalle" class="res-sub">Ingrese los montos</div>
         </div>
 
-        <button class="btn-action btn-cobrar-guardar" onclick="registrarVentaYLimpiar()" style="margin-top: 8px;">💾 Registrar Venta (Finalizar)</button>
+        <div class="fila-acciones" style="margin-top: 8px;">
+            <button class="btn-action btn-cobrar-guardar btn-principal" onclick="registrarVentaYLimpiar()">💾 Registrar Venta (Finalizar)</button>
+            <button class="btn-action btn-limpiar-mini" onclick="pedirLimpiarTodo()">🗑️ Limpiar</button>
+        </div>
     </div>
 
     <!-- PESTAÑA 3: HISTORIAL -->
@@ -386,7 +397,7 @@
     </div>
 
     <button class="btn-action btn-reset" id="btnLimpiar">Limpiar Todo</button>
-    <div style="text-align:center; color:#6b7280; font-size:0.75rem; margin-top:12px;">Hecho por Mauricio · v9</div>
+    <div style="text-align:center; color:#6b7280; font-size:0.75rem; margin-top:12px;">Hecho por Mauricio · v10</div>
 </div>
 
 <script>
@@ -429,6 +440,7 @@
         
         document.getElementById('tab-' + tabName).classList.add('active');
         event.currentTarget.classList.add('active');
+        document.body.classList.toggle('en-historial', tabName === 'historial');
     }
 
     function irACobrar() {
@@ -437,6 +449,7 @@
         
         document.getElementById('tab-caja').classList.add('active');
         document.querySelectorAll('.tab-btn')[1].classList.add('active');
+        document.body.classList.remove('en-historial');
     }
 
     btnAgregar.addEventListener('click', function() {
@@ -602,9 +615,13 @@
         bSi.style.cssText = 'flex:1; padding:13px 8px; border-radius:10px; border:none; background:#ef4444; color:#ffffff; font-size:1rem; font-weight:bold; cursor:pointer;';
         function cerrar() { if (capa.parentNode) capa.parentNode.removeChild(capa); }
         bNo.onclick = cerrar;
-        bSi.onclick = function() { cerrar(); alAceptar(); };
+        bSi.onclick = function() { cerrar(); if (alAceptar) alAceptar(); };
         capa.onclick = function(e) { if (e.target === capa) cerrar(); };
-        fila.appendChild(bNo);
+        if (alAceptar) {
+            fila.appendChild(bNo);
+        } else {
+            bSi.style.background = '#2563eb';
+        }
         fila.appendChild(bSi);
         caja.appendChild(ic);
         caja.appendChild(tt);
@@ -633,6 +650,12 @@
         if (metodoPago === 'Yape') {
             pagoCliente = totalVenta;
             vueltoEntregado = 0;
+        } else if (isNaN(parseFloat(txtPago.value))) {
+            pagoCliente = totalVenta;
+            vueltoEntregado = 0;
+        } else if (pagoCliente < totalVenta - 0.001) {
+            confirmarApp('⚠️', 'Falta dinero', 'El pago (S/ ' + pagoCliente.toFixed(2) + ') es menor al total (S/ ' + totalVenta.toFixed(2) + '). Corrige el monto para registrar la venta.', 'Entendido', null);
+            return;
         }
 
         let ahora = new Date();
@@ -697,7 +720,7 @@
                             ${itemsHtml}
                         </div>
                         <div style="display:flex; gap:8px; margin-top: 8px;" onclick="event.stopPropagation()">
-                            <button class="btn-action btn-foto" style="margin-top:0; flex:1; width:auto;" onclick="fotoVenta(${i})">🖼️ Foto del recibo</button>
+                            <button class="btn-action btn-foto" style="margin-top:0; flex:1; width:auto;" onclick="fotoVenta(${i})">🖼️ Resumen de venta</button>
                             <button class="btn-borrar-venta" onclick="borrarVenta(${i})">🗑️ Borrar</button>
                         </div>
                      </div>`;
@@ -723,7 +746,7 @@
 
     /* ===== NUEVO: COMPARTIR UNA VENTA ===== */
     function armarTextoVenta(venta) {
-        let texto = '🧾 *Recibo de venta*\n';
+        let texto = '🧾 *Detalle de venta*\n';
         texto += '\n🕒 *' + (venta.fecha ? venta.fecha + ', ' : '') + venta.hora + '* - Total: *S/ ' + venta.total.toFixed(2) + '*\n';
         venta.items.forEach(it => {
             texto += '• ' + it.nombre + ': S/ ' + it.precio.toFixed(2) + '\n';
@@ -782,7 +805,7 @@
         const altoFila = function(it) { return detalleItem(it) ? 76 : 52; };
         let sumaFilas = 0;
         venta.items.forEach(function(it) { sumaFilas += altoFila(it); });
-        const H = 268 + (274 + sumaFilas - 14) + m;
+        const H = 298 + (274 + sumaFilas - 14) + m;
         const c = document.createElement('canvas');
         c.width = W;
         c.height = H;
@@ -805,7 +828,7 @@
         g.fillText('Caja Rápida Bodega', W / 2, 82);
         g.fillStyle = '#9ca3af';
         g.font = '24px ' + fuente;
-        g.fillText('Recibo de venta', W / 2, 124);
+        g.fillText('Detalle de venta', W / 2, 124);
         g.fillText((venta.fecha ? venta.fecha + ' - ' : '') + 'Hora: ' + venta.hora, W / 2, 158);
 
         g.setLineDash([8, 6]);
@@ -891,6 +914,9 @@
         g.fillStyle = '#9ca3af';
         g.font = '22px ' + fuente;
         g.fillText('¡Gracias por su compra!', W / 2, yFin + 222 + m);
+        g.fillStyle = '#6b7280';
+        g.font = '19px ' + fuente;
+        g.fillText('Documento referencial, no es comprobante de pago', W / 2, yFin + 258 + m);
 
         return c;
     }
@@ -924,9 +950,9 @@
         canvas.toBlob(async function(blob) {
             if (blob) {
                 try {
-                    let archivo = new File([blob], 'recibo.png', { type: 'image/png' });
+                    let archivo = new File([blob], 'detalle-de-venta.png', { type: 'image/png' });
                     if (navigator.canShare && navigator.canShare({ files: [archivo] })) {
-                        await navigator.share({ files: [archivo], title: 'Recibo de venta' });
+                        await navigator.share({ files: [archivo], title: 'Detalle de venta' });
                         return;
                     }
                 } catch (e) {
@@ -955,6 +981,20 @@
         document.body.removeChild(ta);
     }
     /* ===== FIN COMPARTIR ===== */
+
+    function pedirLimpiarTodo() {
+        let hayAlgo = listaPrecios.length > 0 || txtNombre.value !== '' || txtPrecio.value !== '' || txtPago.value !== '';
+        if (!hayAlgo) {
+            limpiarTodoGeneral();
+            guardarEstado();
+            return;
+        }
+        confirmarApp('🗑️', '¿Borrar todo lo que escribiste?', 'Se borrarán los productos y el pago que estás armando.', 'Sí, borrar', function() {
+            limpiarTodoGeneral();
+            guardarEstado();
+        });
+    }
+    window.pedirLimpiarTodo = pedirLimpiarTodo;
 
     function limpiarTodoGeneral() {
         listaPrecios = [];
@@ -1021,8 +1061,7 @@
             });
             return;
         }
-        limpiarTodoGeneral();
-        guardarEstado();
+        pedirLimpiarTodo();
     });
 </script>
 
