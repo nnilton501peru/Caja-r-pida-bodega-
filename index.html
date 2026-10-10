@@ -129,7 +129,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 6px;
+            padding: 10px 6px;
             border-bottom: 1px solid #2a364d;
             font-size: 1.05rem;
         }
@@ -154,6 +154,7 @@
             font-weight: bold;
             font-size: 1.2rem;
             min-width: 105px;
+            margin-right: 6px;
             text-align: right;
             white-space: nowrap;
             font-variant-numeric: tabular-nums;
@@ -222,6 +223,10 @@
         .btn-whatsapp { background: #25d366; color: #0b0f19; }
         .btn-copiar { background: #273248; border: 1px solid #3b4d6e; }
         .btn-foto { background: #7c3aed; }
+        .num-circ { flex-shrink: 0; min-width: 28px; height: 28px; padding: 0 5px; box-sizing: border-box; border-radius: 14px; background: #2563eb; color: #fff; font-size: 0.85rem; font-weight: bold; display: flex; align-items: center; justify-content: center; margin-right: 10px; }
+        .btn-metodo { flex: 1; padding: 12px 8px; font-size: 1rem; font-weight: bold; border-radius: 10px; border: 2px solid #374151; background: #111827; color: #9ca3af; cursor: pointer; }
+        .btn-metodo.activo { border-color: #34d399; background: #064e3b; color: #ffffff; }
+        .btn-borrar-venta { background: #ef4444; color: #fff; border: none; border-radius: 10px; padding: 0 14px; font-size: 0.95rem; font-weight: bold; cursor: pointer; }
         .total-turno-card { background: #1c2433; border: 1px solid #34d399; border-radius: 8px; padding: 10px; margin-bottom: 8px; }
         .total-turno-label { font-size: 0.8rem; color: #9ca3af; font-weight: bold; }
         .total-turno-fila { display: flex; justify-content: space-between; align-items: baseline; margin-top: 2px; }
@@ -332,6 +337,13 @@
     <!-- PESTAÑA 2: CAJA Y VUELTO -->
     <div id="tab-caja" class="tab-content">
         <div class="card">
+            <span style="font-size: 0.8rem; color: #9ca3af; display:block; margin-bottom:4px;">Método de pago</span>
+            <div style="display:flex; gap:8px; margin-bottom: 4px;">
+                <button class="btn-metodo activo" id="btnEfectivo" onclick="elegirMetodo('Efectivo')">💵 Efectivo</button>
+                <button class="btn-metodo" id="btnYape" onclick="elegirMetodo('Yape')">📱 Yape / Plin</button>
+            </div>
+            <div id="lblNotaYape" style="display:none; font-size:0.75rem; color:#fbbf24; margin-bottom:8px;">Con Yape / Plin se registra el pago exacto, sin vuelto.</div>
+            <div style="height:6px;"></div>
             <span style="font-size: 0.8rem; color: #9ca3af; display:block; margin-bottom:4px;">Total a Pagar (S/)</span>
             <input type="number" id="txtTotal" placeholder="0.00" step="any" style="margin-bottom: 8px;">
 
@@ -374,6 +386,7 @@
     </div>
 
     <button class="btn-action btn-reset" id="btnLimpiar">Limpiar Todo</button>
+    <div style="text-align:center; color:#6b7280; font-size:0.75rem; margin-top:12px;">Hecho por Mauricio · v9</div>
 </div>
 
 <script>
@@ -500,10 +513,12 @@
         let html = '';
         listaPrecios.forEach((item, index) => {
             suma += item.precio;
+            let det = detalleItem(item);
             html += `<div class="item-row">
+                        <span class="num-circ">${index + 1}</span>
                         <div class="item-info">
                             <span class="item-name">${item.nombre}</span>
-                            <span class="item-num">#${index + 1}${(item.cant > 1 && typeof item.unit === 'number') ? ' · ' + item.cant + ' × S/ ' + item.unit.toFixed(2) : ''}</span>
+                            ${det ? '<span class="item-num">' + det + '</span>' : ''}
                         </div>
                         <span class="item-price">S/ ${item.precio.toFixed(2)}</span>
                         <button class="btn-del" onclick="borrarItem(${index})">✕</button>
@@ -555,6 +570,59 @@
         }
     }
 
+    function detalleItem(it) {
+        return (it && it.cant > 1 && Number.isFinite(it.unit)) ? it.cant + ' × S/ ' + it.unit.toFixed(2) : '';
+    }
+
+    function confirmarApp(icono, titulo, texto, textoSi, alAceptar) {
+        if (document.getElementById('capaConfirmar')) return;
+        let capa = document.createElement('div');
+        capa.id = 'capaConfirmar';
+        capa.style.cssText = 'position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.78); z-index:10000; display:flex; align-items:center; justify-content:center; padding:20px;';
+        let caja = document.createElement('div');
+        caja.style.cssText = 'background:#111827; border:1px solid #374151; border-radius:16px; padding:22px 18px; width:100%; max-width:340px; text-align:center;';
+        let ic = document.createElement('div');
+        ic.style.cssText = 'font-size:2.2rem; margin-bottom:8px;';
+        ic.textContent = icono;
+        let tt = document.createElement('div');
+        tt.style.cssText = 'font-size:1.2rem; font-weight:bold; color:#ffffff; margin-bottom:8px;';
+        tt.textContent = titulo;
+        let tx = document.createElement('div');
+        tx.style.cssText = 'font-size:0.95rem; color:#9ca3af; margin-bottom:20px; line-height:1.35;';
+        tx.textContent = texto;
+        let fila = document.createElement('div');
+        fila.style.cssText = 'display:flex; gap:10px;';
+        let bNo = document.createElement('button');
+        bNo.id = 'btnConfCancelar';
+        bNo.textContent = 'Cancelar';
+        bNo.style.cssText = 'flex:1; padding:13px 8px; border-radius:10px; border:1px solid #4b5563; background:#1f2937; color:#e5e7eb; font-size:1rem; font-weight:bold; cursor:pointer;';
+        let bSi = document.createElement('button');
+        bSi.id = 'btnConfSi';
+        bSi.textContent = textoSi;
+        bSi.style.cssText = 'flex:1; padding:13px 8px; border-radius:10px; border:none; background:#ef4444; color:#ffffff; font-size:1rem; font-weight:bold; cursor:pointer;';
+        function cerrar() { if (capa.parentNode) capa.parentNode.removeChild(capa); }
+        bNo.onclick = cerrar;
+        bSi.onclick = function() { cerrar(); alAceptar(); };
+        capa.onclick = function(e) { if (e.target === capa) cerrar(); };
+        fila.appendChild(bNo);
+        fila.appendChild(bSi);
+        caja.appendChild(ic);
+        caja.appendChild(tt);
+        caja.appendChild(tx);
+        caja.appendChild(fila);
+        capa.appendChild(caja);
+        document.body.appendChild(capa);
+    }
+
+    let metodoPago = 'Efectivo';
+
+    window.elegirMetodo = function(m) {
+        metodoPago = (m === 'Yape') ? 'Yape' : 'Efectivo';
+        document.getElementById('btnEfectivo').classList.toggle('activo', metodoPago === 'Efectivo');
+        document.getElementById('btnYape').classList.toggle('activo', metodoPago === 'Yape');
+        document.getElementById('lblNotaYape').style.display = (metodoPago === 'Yape') ? 'block' : 'none';
+    }
+
     window.registrarVentaYLimpiar = function() {
         if (listaPrecios.length === 0) return;
 
@@ -562,6 +630,10 @@
         let datosCalculo = calcularVuelto();
         let pagoCliente = datosCalculo.pagoVal;
         let vueltoEntregado = pagoCliente >= totalVenta ? (pagoCliente - totalVenta) : 0;
+        if (metodoPago === 'Yape') {
+            pagoCliente = totalVenta;
+            vueltoEntregado = 0;
+        }
 
         let ahora = new Date();
         let horaStr = ahora.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -573,6 +645,7 @@
             total: totalVenta,
             pago: pagoCliente,
             vuelto: vueltoEntregado,
+            metodo: (metodoPago === 'Yape') ? 'Yape / Plin' : 'Efectivo',
             items: [...listaPrecios]
         };
 
@@ -599,30 +672,53 @@
 
         let html = '';
         historialVentas.forEach((venta, i) => {
-            let itemsHtml = venta.items.map((it, idx) => `<div style="display:flex; justify-content:space-between; margin-bottom:2px;"><span>#${idx + 1} ${it.nombre}</span><span>S/ ${it.precio.toFixed(2)}</span></div>`).join('');
+            let itemsHtml = venta.items.map((it, idx) => {
+                let det = detalleItem(it);
+                return `<div style="display:flex; align-items:center; padding:6px 0; border-bottom:1px solid #1f2937;">
+                            <span class="num-circ" style="width:auto;">${idx + 1}</span>
+                            <div style="flex:1; min-width:0; overflow-wrap:anywhere;">
+                                <div style="color:#ffffff; font-weight:bold;">${it.nombre}</div>
+                                ${det ? '<div style="color:#9ca3af; font-size:0.8rem;">' + det + '</div>' : ''}
+                            </div>
+                            <span style="color:#34d399; font-weight:bold; white-space:nowrap; margin-left:8px;">S/ ${it.precio.toFixed(2)}</span>
+                        </div>`;
+            }).join('');
             html += `<div class="historial-item" onclick="this.classList.toggle('open')">
                         <div class="historial-header">
                             <span>Total: S/ ${venta.total.toFixed(2)}</span>
                             <span class="historial-time">🕒 ${venta.fecha ? venta.fecha + ', ' : ''}${venta.hora}</span>
                         </div>
                         <div class="historial-resumen-pago">
-                            Pagó: S/ ${venta.pago.toFixed(2)} | Vuelto: S/ ${venta.vuelto.toFixed(2)}
+                            ${venta.metodo ? venta.metodo + ' | ' : ''}Pagó: S/ ${venta.pago.toFixed(2)} | Vuelto: S/ ${venta.vuelto.toFixed(2)}
                         </div>
-                        <div style="font-size: 0.75rem; color: #60a5fa; margin-top: 2px;">Toca para ver detalle de productos ▼</div>
+                        <div style="font-size: 0.95rem; color: #93c5fd; margin-top: 6px; padding: 4px 0;">Toca para ver detalle de productos ▼</div>
                         <div class="historial-detalle">
                             <div style="margin-bottom: 4px; font-weight: bold; color: #34d399;">Productos:</div>
                             ${itemsHtml}
                         </div>
-                        <div class="row" style="margin-top: 8px; margin-bottom: 0;" onclick="event.stopPropagation()">
-                            <button class="btn-action btn-whatsapp" style="flex:1; width:auto; margin-top:0;" onclick="compartirVenta(${i})">📲 WhatsApp</button>
-                            <button class="btn-action btn-copiar" style="flex:1; width:auto; margin-top:0;" onclick="copiarVenta(${i})">📋 Copiar</button>
-                        </div>
-                        <div style="margin-top: 6px;" onclick="event.stopPropagation()">
-                            <button class="btn-action btn-foto" style="margin-top:0;" onclick="fotoVenta(${i})">🖼️ Foto del recibo</button>
+                        <div style="display:flex; gap:8px; margin-top: 8px;" onclick="event.stopPropagation()">
+                            <button class="btn-action btn-foto" style="margin-top:0; flex:1; width:auto;" onclick="fotoVenta(${i})">🖼️ Foto del recibo</button>
+                            <button class="btn-borrar-venta" onclick="borrarVenta(${i})">🗑️ Borrar</button>
                         </div>
                      </div>`;
         });
         divHistorial.innerHTML = html;
+    }
+
+    window.borrarVenta = function(i) {
+        let venta = historialVentas[i];
+        if (!venta) return;
+        let monto = parseFloat(venta.total) || 0;
+        confirmarApp('🗑️', '¿Borrar esta venta?', 'Venta de S/ ' + monto.toFixed(2) + '. También se descontará del total del turno. Esto no se puede deshacer.', 'Sí, borrar', function() {
+            let pos = historialVentas.indexOf(venta);
+            if (pos === -1) return;
+            historialVentas.splice(pos, 1);
+            totalTurno = Math.max(0, Math.round((totalTurno - monto) * 100) / 100);
+            cantVentasTurno = Math.max(0, cantVentasTurno - 1);
+            actualizarTurnoUI();
+            actualizarHistorialUI();
+            guardarEstado();
+        });
     }
 
     /* ===== NUEVO: COMPARTIR UNA VENTA ===== */
@@ -681,8 +777,12 @@
 
     function dibujarRecibo(venta) {
         const W = 600;
-        const filaH = 44;
-        const H = 506 + venta.items.length * filaH;
+        const tieneMetodo = !!venta.metodo;
+        const m = tieneMetodo ? 50 : 0;
+        const altoFila = function(it) { return detalleItem(it) ? 76 : 52; };
+        let sumaFilas = 0;
+        venta.items.forEach(function(it) { sumaFilas += altoFila(it); });
+        const H = 268 + (274 + sumaFilas - 14) + m;
         const c = document.createElement('canvas');
         c.width = W;
         c.height = H;
@@ -720,20 +820,39 @@
 
         let y = 274;
         venta.items.forEach((it, idx) => {
+            // circulito azul con el número
+            g.fillStyle = '#2563eb';
+            g.beginPath();
+            g.arc(64, y - 10, 17, 0, Math.PI * 2);
+            g.fill();
+            g.fillStyle = '#ffffff';
+            g.font = 'bold 19px ' + fuente;
+            g.textAlign = 'center';
+            g.fillText(String(idx + 1), 64, y - 3);
+
             g.textAlign = 'left';
-            g.fillStyle = '#e5e7eb';
-            g.font = '28px ' + fuente;
-            let nombre = '#' + (idx + 1) + ' ' + it.nombre;
-            while (nombre.length > 1 && g.measureText(nombre).width > 330) {
-                nombre = nombre.slice(0, -1);
+            g.fillStyle = '#ffffff';
+            g.font = 'bold 28px ' + fuente;
+            let nombre = String(it.nombre);
+            let corto = nombre;
+            while (corto.length > 1 && g.measureText(corto).width > 290) {
+                corto = corto.slice(0, -1);
             }
-            if (nombre !== '#' + (idx + 1) + ' ' + it.nombre) nombre += '…';
-            g.fillText(nombre, 48, y);
+            if (corto !== nombre) corto += '…';
+            g.fillText(corto, 92, y);
+
+            let det = detalleItem(it);
+            if (det) {
+                g.fillStyle = '#9ca3af';
+                g.font = '22px ' + fuente;
+                g.fillText(det, 92, y + 28);
+            }
+
             g.textAlign = 'right';
             g.fillStyle = '#34d399';
             g.font = 'bold 28px ' + fuente;
             g.fillText('S/ ' + it.precio.toFixed(2), W - 48, y);
-            y += filaH;
+            y += altoFila(it);
         });
 
         let yFin = y - 14;
@@ -749,21 +868,29 @@
 
         g.fillStyle = '#fbbf24';
         g.font = '30px ' + fuente;
+        if (tieneMetodo) {
+            g.textAlign = 'left';
+            g.fillText('Método de pago:', 48, yFin + 114);
+            g.textAlign = 'right';
+            g.fillText(String(venta.metodo), W - 48, yFin + 114);
+        }
+
+        g.font = '30px ' + fuente;
         g.textAlign = 'left';
-        g.fillText('Pagó:', 48, yFin + 114);
+        g.fillText('Pagó:', 48, yFin + 114 + m);
         g.textAlign = 'right';
-        g.fillText('S/ ' + venta.pago.toFixed(2), W - 48, yFin + 114);
+        g.fillText('S/ ' + venta.pago.toFixed(2), W - 48, yFin + 114 + m);
 
         g.font = 'bold 34px ' + fuente;
         g.textAlign = 'left';
-        g.fillText('Vuelto:', 48, yFin + 164);
+        g.fillText('Vuelto:', 48, yFin + 164 + m);
         g.textAlign = 'right';
-        g.fillText('S/ ' + venta.vuelto.toFixed(2), W - 48, yFin + 164);
+        g.fillText('S/ ' + venta.vuelto.toFixed(2), W - 48, yFin + 164 + m);
 
         g.textAlign = 'center';
         g.fillStyle = '#9ca3af';
         g.font = '22px ' + fuente;
-        g.fillText('¡Gracias por su compra!', W / 2, yFin + 222);
+        g.fillText('¡Gracias por su compra!', W / 2, yFin + 222 + m);
 
         return c;
     }
@@ -836,6 +963,7 @@
         txtCant.value = '1';
         txtTotal.value = '';
         txtPago.value = '';
+        elegirMetodo('Efectivo');
         lblSubtotal.innerText = "S/ 0.00";
         lblVuelto.innerText = "S/ 0.00";
         lblVuelto.style.color = "#34d399";
@@ -874,21 +1002,23 @@
 
     btnReiniciarTurno.addEventListener('click', function() {
         if (cantVentasTurno === 0 && totalTurno === 0) return;
-        if (!confirm('¿Reiniciar el total del turno? Esto no borra el historial de ventas, solo el acumulado.')) return;
-        totalTurno = 0;
-        cantVentasTurno = 0;
-        actualizarTurnoUI();
-        guardarEstado();
+        confirmarApp('🔄', '¿Reiniciar el total del turno?', 'Esto no borra el historial de ventas, solo el acumulado.', 'Sí, reiniciar', function() {
+            totalTurno = 0;
+            cantVentasTurno = 0;
+            actualizarTurnoUI();
+            guardarEstado();
+        });
     });
 
     btnLimpiar.addEventListener('click', function() {
         let enHistorial = document.getElementById('tab-historial').classList.contains('active');
         if (enHistorial) {
             if (historialVentas.length === 0) return;
-            if (!confirm('¿Seguro que quieres borrar todo el historial de ventas? Esto no se puede deshacer.')) return;
-            historialVentas = [];
-            actualizarHistorialUI();
-            guardarEstado();
+            confirmarApp('🗑️', '¿Borrar todo el historial?', 'Se borrarán todas las ventas guardadas. Esto no se puede deshacer.', 'Sí, borrar todo', function() {
+                historialVentas = [];
+                actualizarHistorialUI();
+                guardarEstado();
+            });
             return;
         }
         limpiarTodoGeneral();
