@@ -382,6 +382,17 @@
         .calc-grid .fn{font-size:1.5rem;box-shadow:0 4px 0 #fecaca}
         .calc-grid .op{box-shadow:0 4px 0 #ca8a04}
         .calc-grid .ig{height:auto;box-shadow:0 4px 0 #c2410c}
+
+        /* v13 - barra fija y ajustes */
+        .subtotal-box{margin-top:14px}
+        .barra-fija{position:fixed;left:0;right:0;bottom:0;margin:0 auto;max-width:432px;background:#fff;border-top:1px solid #cbd5e1;border-radius:16px 16px 0 0;box-shadow:0 -6px 18px rgba(12,74,110,.18);padding:12px 16px calc(16px + env(safe-area-inset-bottom));z-index:50}
+        .barra-totales{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;color:#475569;font-size:1rem}
+        .barra-totales .tot{color:#0c4a6e}
+        .barra-totales b{font-size:1.7rem;color:#0e7490}
+        .barra-fija .fila-acciones{margin-top:0;gap:10px}
+        .barra-fija .btn-principal{flex:1.4}
+        .barra-fija .btn-limpiar-mini{flex:1;white-space:nowrap;padding-left:8px;padding-right:8px}
+        body:has(#tab-sumadora.active){padding-bottom:150px}
     </style>
 </head>
 <body>
@@ -395,7 +406,7 @@
     
     <!-- Pestañas de Navegación -->
     <div class="tabs">
-        <button class="tab-btn active" onclick="cambiarTab('sumadora', event)"><span class="tab-ico">📋</span><br>Suma</button>
+        <button class="tab-btn active" onclick="cambiarTab('sumadora', event)"><span class="tab-ico">📋</span><br>Pedido</button>
         <button class="tab-btn" onclick="cambiarTab('caja', event)"><span class="tab-ico">💵</span><br>Cobrar</button>
         <button class="tab-btn" onclick="cambiarTab('historial', event)"><span class="tab-ico">⏱️</span><br>Historial</button>
         <button class="tab-btn" onclick="cambiarTab('calc', event)"><span class="tab-ico">🧮</span><br>Calc</button>
@@ -407,7 +418,7 @@
             <!-- Campo opcional de Nombre (Arriba y discreto) -->
             <input type="text" id="txtNombre" placeholder="Nombre (Opcional: Arroz, Fideos...)" style="margin-bottom: 6px;">
             
-            <div class="row" style="align-items: flex-end;">
+            <div class="row" style="align-items: stretch;">
                 <div style="flex:1; min-width:0;">
                     <div class="lbl-mini">Precio</div>
                     <input type="number" id="txtPrecio" placeholder="0.00" step="any">
@@ -416,7 +427,10 @@
                     <div class="lbl-mini">Cantidad</div>
                     <input type="number" id="txtCant" value="1" min="1" step="1" inputmode="numeric">
                 </div>
-                <button class="btn-plus" id="btnAgregar" style="padding: 14px 12px; line-height: 1.15;">Agregar</button>
+                <div style="display:flex; flex-direction:column; flex-shrink:0;">
+                    <div class="lbl-mini">&nbsp;</div>
+                    <button class="btn-plus" id="btnAgregar" style="flex:1; padding: 0 14px; line-height: 1.15;">Agregar</button>
+                </div>
             </div>
             
             <div class="subtotal-box">
@@ -430,9 +444,12 @@
                 <div style="color: #6b7280; text-align: center; padding: 10px;">Sin productos</div>
             </div>
         </div>
-        <div class="fila-acciones">
-            <button class="btn-action btn-cobrar-guardar btn-principal" onclick="irACobrar()">Ir a Cobrar / Guardar</button>
-            <button class="btn-action btn-limpiar-mini" onclick="pedirLimpiarTodo()">🗑️ Limpiar</button>
+        <div class="barra-fija" id="barraFija">
+            <div class="barra-totales"><span id="barCant">0 productos</span><span class="tot">Total <b id="barTotal">S/ 0.00</b></span></div>
+            <div class="fila-acciones">
+                <button class="btn-action btn-cobrar-guardar btn-principal" onclick="irACobrar()">Ir a Cobrar / Guardar</button>
+                <button class="btn-action btn-limpiar-mini" onclick="pedirLimpiarTodo()">🗑️ Limpiar</button>
+            </div>
         </div>
     </div>
 
@@ -505,7 +522,7 @@
     </div>
 
     <button class="btn-action btn-reset" id="btnLimpiar">Limpiar Todo</button>
-    <div style="text-align:center; color:#6b7280; font-size:0.85rem; margin-top:14px;">Hecho por Mauricio · v12</div>
+    <div style="text-align:center; color:#6b7280; font-size:0.85rem; margin-top:14px;">Hecho por Mauricio · v13</div>
 </div>
 
 <script>
@@ -1268,7 +1285,19 @@
         });
         pintar();
     })();
-    /* ===== FIN v12 ===== */
+    /* ===== v13: BARRA FIJA ===== */
+    (function() {
+        const bc = document.getElementById('barCant'), bt = document.getElementById('barTotal');
+        function sync() {
+            let u = 0;
+            listaPrecios.forEach(i => { u += (i.cant || 1); });
+            bc.textContent = u + (u === 1 ? ' producto' : ' productos');
+            bt.textContent = lblSubtotal.innerText;
+        }
+        new MutationObserver(sync).observe(lblSubtotal, { childList: true, characterData: true, subtree: true });
+        sync();
+    })();
+    /* ===== FIN v13 ===== */
 
     // Pintar lo que ya estaba guardado al abrir la página
     actualizarPantalla();
