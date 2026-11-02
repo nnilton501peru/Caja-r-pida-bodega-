@@ -332,6 +332,56 @@
         .calc-grid .fn{background:#fee2e2;border-color:#fecaca;color:#b91c1c}
         .calc-grid .ig{background:#f97316;border-color:#ea580c;color:#fff;grid-row:span 2}
         .calc-grid .cero{grid-column:span 2}
+
+        /* v12 - retoques premium */
+        .container{padding:14px;border-radius:16px;box-shadow:0 6px 24px rgba(12,74,110,.12)}
+        .titulo-fila{margin:-14px -14px 14px;padding:16px 54px 14px;border-radius:15px 15px 0 0}
+        h2{font-size:1.6rem;text-align:center;letter-spacing:.2px}
+        .titulo-sub{color:#e0f2fe;font-size:.95rem;text-align:center;margin-top:2px}
+        .btn-pantalla{width:38px;height:38px;font-size:1.25rem}
+        .btn-pantalla:active{transform:translateY(-50%)}
+        .tabs{gap:8px;margin-bottom:14px}
+        .tab-btn{font-size:clamp(.85rem,3.9vw,1rem);padding:8px 0 7px;line-height:1.2;white-space:nowrap;border-radius:12px;box-shadow:0 3px 0 #bae6fd}
+        .tab-btn.active{box-shadow:0 3px 0 #c2410c}
+        .tab-ico{font-size:1.5rem;line-height:1.35}
+        button:active{transform:translateY(3px)}
+        .card{padding:12px;margin-bottom:14px;border-radius:14px;box-shadow:0 2px 8px rgba(8,145,178,.10)}
+        .result-panel,.total-turno-card,.subtotal-box{border-radius:14px}
+        .result-panel,.total-turno-card{box-shadow:0 2px 8px rgba(8,145,178,.10)}
+        input[type="text"],input[type="number"]{padding:12px;border-radius:12px}
+        input[type="text"]{font-size:1.15rem}
+        .lbl-mini{font-size:.9rem;margin-bottom:3px}
+        .btn-plus{font-size:1rem;border-radius:12px;box-shadow:0 4px 0 #ca8a04}
+        .item-row{padding:14px 6px}
+        .item-name{font-size:1.1rem}
+        .item-num{font-size:.9rem}
+        .quick-cash{gap:10px}
+        .btn-cash{padding:14px 0;font-size:1.15rem;border-radius:12px;box-shadow:0 3px 0 #facc15}
+        .btn-metodo{border-radius:12px;box-shadow:0 3px 0 #cbd5e1}
+        .btn-metodo.activo{box-shadow:0 3px 0 #0891b2}
+        .res-title{font-size:.9rem}
+        .res-sub{font-size:.95rem}
+        .btn-action{font-size:1.05rem;padding:14px;border-radius:12px}
+        .btn-cobrar-guardar{box-shadow:0 4px 0 #c2410c}
+        .btn-foto{box-shadow:0 3px 0 #0e7490}
+        .historial-time{font-size:.9rem}
+        .historial-header{font-size:1.05rem}
+        .historial-resumen-pago{font-size:.95rem}
+        .historial-detalle{font-size:1rem}
+        .historial-item{border-radius:14px}
+        .total-turno-label{font-size:.9rem}
+        .total-turno-cant{font-size:1.05rem}
+        .btn-reiniciar-turno{font-size:.95rem;padding:10px}
+        .calc-pant{display:flex;flex-direction:column;justify-content:flex-end;min-height:120px;padding:14px 16px;border-radius:16px;margin-bottom:12px;text-align:right}
+        .calc-hist{color:#fff;font-size:2.2rem;font-weight:bold;text-align:right;overflow-wrap:anywhere;line-height:1.15;min-height:1.15em}
+        .calc-valor{color:#7dd3fc;font-size:1.5rem;font-weight:normal;text-align:right;min-height:1.3em;margin-top:4px}
+        .calc-pant.final .calc-hist{color:#bae6fd;font-size:1.15rem;font-weight:normal}
+        .calc-pant.final .calc-valor{color:#fff;font-size:2.8rem;font-weight:bold;white-space:nowrap}
+        .calc-grid{gap:10px}
+        .calc-grid button{height:clamp(54px,8vh,70px);padding:0;font-size:1.8rem;border-radius:14px;box-shadow:0 4px 0 #bae6fd}
+        .calc-grid .fn{font-size:1.5rem;box-shadow:0 4px 0 #fecaca}
+        .calc-grid .op{box-shadow:0 4px 0 #ca8a04}
+        .calc-grid .ig{height:auto;box-shadow:0 4px 0 #c2410c}
     </style>
 </head>
 <body>
@@ -339,15 +389,16 @@
 <div class="container">
     <div class="titulo-fila">
         <h2>Delivery Playazo</h2>
+        <div class="titulo-sub">¡Tu antojo, directo a la playa!</div>
         <button class="btn-pantalla" id="btnPantalla" title="Pantalla completa">⛶</button>
     </div>
     
     <!-- Pestañas de Navegación -->
     <div class="tabs">
-        <button class="tab-btn active" onclick="cambiarTab('sumadora', event)">📋<br>Suma</button>
-        <button class="tab-btn" onclick="cambiarTab('caja', event)">💵<br>Cobrar</button>
-        <button class="tab-btn" onclick="cambiarTab('historial', event)">⏱️<br>Historial</button>
-        <button class="tab-btn" onclick="cambiarTab('calc', event)">🧮<br>Calc</button>
+        <button class="tab-btn active" onclick="cambiarTab('sumadora', event)"><span class="tab-ico">📋</span><br>Suma</button>
+        <button class="tab-btn" onclick="cambiarTab('caja', event)"><span class="tab-ico">💵</span><br>Cobrar</button>
+        <button class="tab-btn" onclick="cambiarTab('historial', event)"><span class="tab-ico">⏱️</span><br>Historial</button>
+        <button class="tab-btn" onclick="cambiarTab('calc', event)"><span class="tab-ico">🧮</span><br>Calc</button>
     </div>
 
     <!-- PESTAÑA 1: SUMADORA Y LISTA -->
@@ -361,7 +412,7 @@
                     <div class="lbl-mini">Precio</div>
                     <input type="number" id="txtPrecio" placeholder="0.00" step="any">
                 </div>
-                <div style="width:82px; flex-shrink:0;">
+                <div style="width:72px; flex-shrink:0;">
                     <div class="lbl-mini">Cantidad</div>
                     <input type="number" id="txtCant" value="1" min="1" step="1" inputmode="numeric">
                 </div>
@@ -388,17 +439,17 @@
     <!-- PESTAÑA 2: CAJA Y VUELTO -->
     <div id="tab-caja" class="tab-content">
         <div class="card">
-            <span style="font-size: 0.8rem; color: #475569; display:block; margin-bottom:4px;">Método de pago</span>
+            <span style="font-size: 0.95rem; color: #475569; display:block; margin-bottom:4px;">Método de pago</span>
             <div style="display:flex; gap:8px; margin-bottom: 4px;">
                 <button class="btn-metodo activo" id="btnEfectivo" onclick="elegirMetodo('Efectivo')">💵 Efectivo</button>
                 <button class="btn-metodo" id="btnYape" onclick="elegirMetodo('Yape')">📱 Yape / Plin</button>
             </div>
-            <div id="lblNotaYape" style="display:none; font-size:0.75rem; color:#c2410c; margin-bottom:8px;">Con Yape / Plin se registra el pago exacto, sin vuelto.</div>
+            <div id="lblNotaYape" style="display:none; font-size:0.9rem; color:#c2410c; margin-bottom:8px;">Con Yape / Plin se registra el pago exacto, sin vuelto.</div>
             <div style="height:6px;"></div>
-            <span style="font-size: 0.8rem; color: #475569; display:block; margin-bottom:4px;">Total a Pagar (S/)</span>
+            <span style="font-size: 0.95rem; color: #475569; display:block; margin-bottom:4px;">Total a Pagar (S/)</span>
             <input type="number" id="txtTotal" placeholder="0.00" step="any" readonly style="margin-bottom: 8px;">
 
-            <span style="font-size: 0.8rem; color: #475569; display:block; margin-bottom:4px;">Pago del cliente (S/)</span>
+            <span style="font-size: 0.95rem; color: #475569; display:block; margin-bottom:4px;">Pago del cliente (S/)</span>
             <input type="number" id="txtPago" placeholder="0.00" step="any" style="margin-bottom: 6px;">
 
             <div class="quick-cash">
@@ -434,7 +485,7 @@
             <button class="btn-reiniciar-turno" id="btnReiniciarTurno">Reiniciar total del turno</button>
         </div>
         <div class="card">
-            <span style="font-size: 0.85rem; color: #475569; display:block; margin-bottom:6px; font-weight:bold;">Últimas Ventas (Toca para ver detalle):</span>
+            <span style="font-size: 0.95rem; color: #475569; display:block; margin-bottom:6px; font-weight:bold;">Últimas Ventas (Toca para ver detalle):</span>
             <div id="divHistorial">
                 <div style="color: #6b7280; text-align: center; padding: 15px;">No hay ventas registradas aún</div>
             </div>
@@ -443,7 +494,7 @@
 
     <!-- PESTAÑA 4: CALCULADORA -->
     <div id="tab-calc" class="tab-content">
-        <div class="calc-pant"><div class="calc-hist" id="calcHist"></div><div class="calc-valor" id="calcValor">0</div></div>
+        <div class="calc-pant" id="calcPant"><div class="calc-hist" id="calcHist">0</div><div class="calc-valor" id="calcValor"></div></div>
         <div class="calc-grid" id="calcGrid">
             <button class="fn" data-k="C">C</button><button class="fn" data-k="B">⌫</button><button class="op" data-k="/">÷</button><button class="op" data-k="*">×</button>
             <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button><button class="op" data-k="-">−</button>
@@ -454,7 +505,7 @@
     </div>
 
     <button class="btn-action btn-reset" id="btnLimpiar">Limpiar Todo</button>
-    <div style="text-align:center; color:#6b7280; font-size:0.75rem; margin-top:12px;">Hecho por Mauricio · v11</div>
+    <div style="text-align:center; color:#6b7280; font-size:0.85rem; margin-top:14px;">Hecho por Mauricio · v12</div>
 </div>
 
 <script>
@@ -762,7 +813,7 @@
                             <span class="num-circ" style="width:auto;">${idx + 1}</span>
                             <div style="flex:1; min-width:0; overflow-wrap:anywhere;">
                                 <div style="color:#0c4a6e; font-weight:bold;">${it.nombre}</div>
-                                ${det ? '<div style="color:#475569; font-size:0.8rem;">' + det + '</div>' : ''}
+                                ${det ? '<div style="color:#475569; font-size:0.9rem;">' + det + '</div>' : ''}
                             </div>
                             <span style="color:#0e7490; font-weight:bold; white-space:nowrap; margin-left:8px;">S/ ${it.precio.toFixed(2)}</span>
                         </div>`;
@@ -775,7 +826,7 @@
                         <div class="historial-resumen-pago">
                             ${venta.metodo ? venta.metodo + ' | ' : ''}Pagó: S/ ${venta.pago.toFixed(2)} | Vuelto: S/ ${venta.vuelto.toFixed(2)}
                         </div>
-                        <div style="font-size: 0.95rem; color: #93c5fd; margin-top: 6px; padding: 4px 0;">Toca para ver detalle de productos ▼</div>
+                        <div style="font-size: 1.05rem; color: #93c5fd; margin-top: 6px; padding: 4px 0;">Toca para ver detalle de productos ▼</div>
                         <div class="historial-detalle">
                             <div style="margin-bottom: 4px; font-weight: bold; color: #0e7490;">Productos:</div>
                             ${itemsHtml}
@@ -1135,45 +1186,89 @@
     };
 
     (function() {
-        let acc = null, op = null, ent = '0', nuevo = true;
-        const pv = document.getElementById('calcValor');
-        const ph = document.getElementById('calcHist');
+        let toks = [], ent = '0', nuevo = true, fin = false, ult = '';
+        const pant = document.getElementById('calcPant');
+        const arriba = document.getElementById('calcHist');
+        const abajo = document.getElementById('calcValor');
         const sim = { '/': '÷', '*': '×', '-': '−', '+': '+' };
+        const esOp = t => t === '+' || t === '-' || t === '*' || t === '/';
         function fmt(n) { return String(parseFloat(n.toFixed(10))); }
-        function calc(a, o, b) { return o === '+' ? a + b : o === '-' ? a - b : o === '*' ? a * b : (b === 0 ? NaN : a / b); }
-        function error() { acc = null; op = null; ent = 'Error'; nuevo = true; }
-        function pintar() { pv.textContent = ent; ph.textContent = (acc !== null && op) ? fmt(acc) + ' ' + sim[op] : ''; }
+        function texto(t) { return t.map(x => esOp(x) ? sim[x] : x).join(' '); }
+        function armar() { return nuevo ? toks.slice() : toks.concat([ent]); }
+        function evaluar(t) {
+            let n = [parseFloat(t[0])], o = [];
+            for (let i = 1; i < t.length; i += 2) {
+                const op = t[i], v = parseFloat(t[i + 1]);
+                if (op === '*' || op === '/') {
+                    const x = n.pop();
+                    if (op === '/' && v === 0) return NaN;
+                    n.push(op === '*' ? x * v : x / v);
+                } else { o.push(op); n.push(v); }
+            }
+            let r = n[0];
+            for (let i = 0; i < o.length; i++) r = (o[i] === '+') ? r + n[i + 1] : r - n[i + 1];
+            return r;
+        }
+        function reiniciar() { toks = []; ent = '0'; nuevo = true; fin = false; }
+        function pintar() {
+            let a, b;
+            if (fin) { a = ult; b = ent; }
+            else {
+                const t = armar();
+                a = t.length ? texto(t) : ent;
+                const p = t.slice();
+                if (p.length && esOp(p[p.length - 1])) p.pop();
+                const r = p.length >= 3 ? evaluar(p) : NaN;
+                b = isFinite(r) ? fmt(r) : '';
+            }
+            pant.classList.toggle('final', fin);
+            arriba.textContent = a;
+            abajo.textContent = b;
+            arriba.style.fontSize = fin ? '' : (a.length > 20 ? '1.4rem' : a.length > 13 ? '1.8rem' : '');
+            abajo.style.fontSize = (fin && b.length > 10) ? '2rem' : '';
+        }
         document.getElementById('calcGrid').addEventListener('click', function(e) {
-            const b = e.target.closest('button');
-            if (!b) return;
-            const k = b.dataset.k;
-            if (ent === 'Error') ent = '0';
-            if (k === 'C') { acc = null; op = null; ent = '0'; nuevo = true; }
-            else if (k === 'B') { if (!nuevo) ent = ent.length > 1 ? ent.slice(0, -1) : '0'; }
-            else if (k === '.') { if (nuevo) { ent = '0.'; nuevo = false; } else if (ent.indexOf('.') < 0) ent += '.'; }
+            const btn = e.target.closest('button');
+            if (!btn) return;
+            const k = btn.dataset.k;
+            if (k === 'C') { reiniciar(); ult = ''; }
+            else if (k === 'B') {
+                if (fin) reiniciar();
+                else if (!nuevo) {
+                    ent = ent.length > 1 ? ent.slice(0, -1) : '0';
+                    if (ent === '0' || ent === '-') { ent = '0'; nuevo = true; }
+                }
+                else if (toks.length >= 2) { toks.pop(); ent = toks.pop(); nuevo = false; }
+            }
+            else if (k === '.') {
+                if (fin) reiniciar();
+                if (nuevo) { ent = '0.'; nuevo = false; }
+                else if (ent.indexOf('.') < 0) ent += '.';
+            }
             else if (k.length === 1 && k >= '0' && k <= '9') {
+                if (fin) reiniciar();
                 if (nuevo) { ent = k; nuevo = false; }
-                else if (ent.length < 12) ent = (ent === '0') ? k : ent + k;
+                else if (ent.replace('.', '').length < 12) ent = (ent === '0') ? k : ent + k;
             }
             else if (k === '=') {
-                if (op !== null && acc !== null) {
-                    const r = calc(acc, op, parseFloat(ent));
-                    if (!isFinite(r)) error(); else { ent = fmt(r); acc = null; op = null; nuevo = true; }
+                const t = armar();
+                if (!fin && t.length >= 3 && !esOp(t[t.length - 1])) {
+                    ult = texto(t) + ' =';
+                    const r = evaluar(t);
+                    toks = []; fin = true; nuevo = true;
+                    ent = isFinite(r) ? fmt(r) : 'Error';
                 }
             }
             else {
-                if (op !== null && acc !== null && !nuevo) {
-                    const r = calc(acc, op, parseFloat(ent));
-                    if (!isFinite(r)) { error(); pintar(); return; }
-                    acc = r; ent = fmt(r);
-                } else { acc = parseFloat(ent); }
-                op = k; nuevo = true;
+                if (fin) { if (ent === 'Error') ent = '0'; toks = [ent, k]; fin = false; nuevo = true; }
+                else if (nuevo && toks.length) { toks[toks.length - 1] = k; }
+                else { toks.push(ent, k); nuevo = true; }
             }
             pintar();
         });
         pintar();
     })();
-    /* ===== FIN v11 ===== */
+    /* ===== FIN v12 ===== */
 
     // Pintar lo que ya estaba guardado al abrir la página
     actualizarPantalla();
